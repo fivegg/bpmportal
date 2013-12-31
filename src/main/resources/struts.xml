@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="gbk"?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<!-- 设置Web应用的默认编码集为gbk -->
+	<constant name="struts.i18n.encoding" value="gbk"/>
+	<!-- 设置Web应用的默认Locale为zh_CN -->
+	<constant name="struts.locale" value="zh_CN" />
+	<!-- 设置Struts2应用的国际化资源文件，多个文件中间可用逗号分隔 -->
+	<constant name="struts.custom.i18n.resources" value="messageResource"/>
+	<!-- 设置Struts2应用是否处于开发模式，通常在开发调试阶段设为true,正式上线后可设为false -->
+	<constant name="struts.devMode" value="true" />
+	<!-- 设置Struts2的默认主题为simple -->
+	<constant name="struts.ui.theme" value="simple" />
+	
+	<!-- 定义一个名为hello的包,继承Struts2的默认包 -->
+    <package name="hello" extends="struts-default">
+		<!-- 配置业务控制器HelloAction映射 -->
+		<action name="sayhello" class="com.helloworld.struts.action.HelloAction">
+			<!-- 定义名为success的局部result，其结果类型为默认的dispatcher -->
+			<result>/welcome.jsp</result>
+			<!-- 定义名为input的局部result，其结果类型为默认的dispatcher -->
+			<result name="input">/index.jsp</result>
+		</action>
+    </package>
+    <package name="MyWork" extends="struts-default" namespace="/mywork">
+        <action name="index" class="com.schdri.bpmportal.action.MyWork.IndexWork" method="index">
+			<result>/mywork/index.jsp</result>
+		</action>  
+		<action name="taskViewForm" class="com.schdri.bpmportal.action.MyWork.TaskDetail" method="taskViewForm">
+			<result>/mywork/taskviewform.jsp</result>
+		</action>  
+    </package>
+    
+	<!-- 定义供异步调用的包，指定命名空间为/ajax -->
+    <package name="ajax" extends="json-default" namespace="/ajax">
+    	<action name="listInbox" class="com.schdri.bpmportal.action.MyWork.InboxWork" method="listInbox">
+		    <interceptor-ref name="alias"/>
+		    <param name="aliases">#{'page' : 'pagenumber'}</param>		    	
+			<param name="aliases">#{'rows' : 'rownumber'}</param>		    	
+		    
+			<result type="json">
+				<!-- 指定不需要序列化输出给客户端的属性列表 -->
+				<param name="root">model</param>  
+				<param name="includeProperties">
+					total,rows\[\d+\]\.category1,rows\[\d+\]\.category2,rows\[\d+\]\.priority,rows\[\d+\]\.rootProcessNameOrUrl,rows\[\d+\]\.taskNameOrUrl,rows\[\d+\]\.lastUpdateDate,rows\[\d+\]\.taskCandidates,rows\[\d+\]\.expectedEndDate
+				</param>
+			</result>
+			<result type="json" name="input">
+			</result>
+		</action>    	
+		<action name="listFinished" class="com.schdri.bpmportal.action.MyWork.FinishedWork" method="listFinished">
+		    <interceptor-ref name="alias"/>
+		    <param name="aliases">#{'page' : 'pagenumber'}</param>		    	
+			<param name="aliases">#{'rows' : 'rownumber'}</param>		    	
+		    
+			<result type="json">
+				<!-- 指定不需要序列化输出给客户端的属性列表 -->
+				<param name="root">model</param>  
+				<param name="includeProperties">
+					total,rows\[\d+\]\.category1,rows\[\d+\]\.category2,rows\[\d+\]\.UUID,rows\[\d+\]\.rootProcessNameOrUrl,rows\[\d+\]\.taskNameOrUrl,rows\[\d+\]\.lastUpdateDate,rows\[\d+\]\.expectedEndDate
+				</param>
+			</result>
+			<result type="json" name="input">
+			</result>
+		</action>   
+		<action name="listInvolved" class="com.schdri.bpmportal.action.MyWork.InvolvedWork" method="listInvolved">
+		    <interceptor-ref name="alias"/>
+		    <param name="aliases">#{'page' : 'pagenumber'}</param>		    	
+			<param name="aliases">#{'rows' : 'rownumber'}</param>		    	
+		    
+			<result type="json">
+				<param name="root">model</param>  
+			</result>
+			<result type="json" name="input">
+			</result>
+		</action>  
+		<action name="runTask" class="com.schdri.bpmportal.action.MyWork.TaskDetail" method="runTask">
+			<result type="json">
+				<param name="root">taskInstance</param>
+				<param name="includeProperties">
+					taskNameOrUrl,state,strUUID,activityDefinitionUUID.*
+				</param>  
+			</result>
+		</action>  
+		<action name="listComments" class="com.schdri.bpmportal.action.MyWork.TaskDetail" method="listComments">
+			<result type="json">
+				<!-- 指定不需要序列化输出给客户端的属性列表 -->
+				<param name="root">commentsTable</param>
+				<param name="includeProperties">
+					total,rows\[\d+\]\.userId,rows\[\d+\]\.date,rows\[\d+\]\.message
+				</param>  
+			</result>
+			<result type="json" name="input">
+			</result>
+		</action>  
+		<action name="saveComment" class="com.schdri.bpmportal.action.MyWork.TaskDetail" method="saveComment">
+			<result type="json">
+				<param name="root">message</param>
+			</result>
+		</action>  
+		<action name="listHistory" class="com.schdri.bpmportal.action.MyWork.TaskDetail" method="listHistory">
+			<result type="json">
+				<param name="root">historyTable</param>
+				<param name="includeProperties">
+					total,rows\[\d+\]\.strUUID,rows\[\d+\]\.activityLabel,rows\[\d+\]\.type,rows\[\d+\]\.readyDate,rows\[\d+\]\.startedDate,rows\[\d+\]\.endedDate,rows\[\d+\]\.taskCandidates,rows\[\d+\]\.taskUser,rows\[\d+\]\.state
+				</param>  
+			</result>
+		</action>
+		<action name="skipActivity" class="com.schdri.bpmportal.action.MyWork.TaskDetail" method="skipActivity">
+			<result type="json">
+				<param name="includeProperties">
+					message
+				</param>  
+			</result>
+		</action>
+		<action name="selectUser" class="com.schdri.bpmportal.action.bonita.UserMgr" method="selectUser">
+			<result type="json">
+				<param name="root">userTree</param>  
+			</result>
+		</action>  
+    </package>
+</struts>
